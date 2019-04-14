@@ -1,7 +1,9 @@
+from game.point.Point import Point
+from game.direction.Direction import Direction
+from game.exception import SnakeCollisionException, WinException
+
+
 class Snake:
-    __direction = None
-    __prev_direction = None
-    __speed = None
 
     @property
     def x(self):
@@ -13,7 +15,15 @@ class Snake:
 
     @property
     def size(self):
-        return self.__size
+        return self._size
+
+    @property
+    def step(self):
+        return self._step
+
+    @property
+    def direction(self):
+        return self._direction
 
     @x.setter
     def x(self, x):
@@ -25,62 +35,60 @@ class Snake:
 
     @size.setter
     def size(self, size):
-        self.__size = size
+        self._size = size
+
+    @step.setter
+    def step(self, step):
+        self._step = step
 
     def __init__(self):
-        self.x = [10, 30]
-        self.y = [10, 10]
-        self.size = 2
-        self.__speed = 20
-        self.__direction = 0
-        self.__prev_direction = 0
+        self._x = [10, 30]
+        self._y = [10, 10]
+        self._size = 2
+        self._step = 20
+        self._direction = Direction()
 
     def move(self, point):
-        self.__prev_direction = self.__direction
+        self._direction.previous_direction = self._direction.current_direction
 
         for i in range(self.size - 1, 0, -1):
-            self.x[i] = self.x[i - 1]
-            self.y[i] = self.y[i - 1]
+            self._x[i] = self._x[i - 1]
+            self._y[i] = self._y[i - 1]
 
-        if self.__direction == 0:
-            self.x[0] = self.x[0] + self.__speed
-        if self.__direction == 1:
-            self.x[0] = self.x[0] - self.__speed
-        if self.__direction == 2:
-            self.y[0] = self.y[0] - self.__speed
-        if self.__direction == 3:
-            self.y[0] = self.y[0] + self.__speed
+        if self._direction.current_direction == 0:
+            self._x[0] = self._x[0] + self._step
+        if self._direction.current_direction == 1:
+            self._x[0] = self._x[0] - self._step
+        if self._direction.current_direction == 2:
+            self._y[0] = self._y[0] - self._step
+        if self._direction.current_direction == 3:
+            self._y[0] = self._y[0] + self._step
 
-        self.x[0] = self.x[0] % 600
-        self.y[0] = self.y[0] % 500
+        self._x[0] = self._x[0] % 600
+        self._y[0] = self._y[0] % 500
 
-        self.__snake_collision()
-        self.__point_collision(point)
+        if self.snake_collision():
+            raise SnakeCollisionException("Snake is eating himself!")
 
-    def move_right(self):
-        if self.__prev_direction != 1:
-            self.__direction = 0
+        self._point_collision(point)
 
-    def move_left(self):
-        if self.__prev_direction != 0:
-            self.__direction = 1
+    def _point_collision(self, point):
+        if len(point) == 0:
+            return
 
-    def move_up(self):
-        if self.__prev_direction != 3:
-            self.__direction = 2
+        if self._x[0] == point[0].x and self._y[0] == point[0].y:
+            self._x.append(self.x[0])
+            self._y.append(self.y[0])
+            self._size += 1
 
-    def move_down(self):
-        if self.__prev_direction != 2:
-            self.__direction = 3
+            if self._size == 750:
+                raise WinException("Snake is sooo loooong!")
+            else:
+                point[0] = Point(snake=self)
 
-    def __point_collision(self, point):
-        if self.x[0] == point[0].x and self.y[0] == point[0].y:
-            self.x.append(self.x[0])
-            self.y.append(self.y[0])
-            self.size += 1
-            del point[0]
-
-    def __snake_collision(self):
-        for i in range(self.size - 1, 0, -1):
+    def snake_collision(self):
+        for i in range(self._size - 1, 0, -1):
             if self.x[0] == self.x[i] and self.y[0] == self.y[i]:
-                raise Exception("Snake is eating himself!")
+                return True
+
+        return False

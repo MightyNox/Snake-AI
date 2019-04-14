@@ -1,0 +1,2 @@
+class WinException(Exception):
+    pass
