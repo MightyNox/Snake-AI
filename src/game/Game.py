@@ -1,9 +1,9 @@
 import pygame
+
 from game.window.Window import Window
 from game.snake.Snake import Snake
 from game.point.Point import Point
 from game.control.Control import Control
-from ai.data import Data
 
 
 class Game:
@@ -11,7 +11,6 @@ class Game:
     def __init__(self, mode, speed):
         self._window = Window()
         self._snake = [Snake()]
-        self._data = Data(self._snake)
         self._point = [Point(snake=self._snake[0])]
         self._control = Control(mode=mode, snake=self._snake, point=self._point)
         self._clock = pygame.time.Clock()
@@ -33,13 +32,10 @@ class Game:
                     print("score={}".format(self._snake[0].size))
                     self._snake[0] = Snake()
 
-        self._data.save()
-
     def _game_body(self):
         self._calc_time()
 
         if self._time >= self._speed:
-            self._data.collect()
             self._snake[0].move(self._point)
             self._time = 0
 

@@ -1,10 +1,15 @@
+import argparse
+
 from game.Game import Game
-from ai import Model
 
 if __name__ == "__main__":
-    game = Game("bot", 1)
-    model = Model()
-    model.create_neural_network_model()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--game_mode', dest='game_mode', type=str, default='user', help="'bot' or 'user'")
+    parser.add_argument('--latency', dest='latency', type=int, default=100, help='Latency of the snake')
+    args = parser.parse_args()
 
-    ''' 3 modes user/bot/ai '''
-    #game.start()
+    game_mode= args.game_mode
+    latency = args.latency
+    game = Game(game_mode, latency)
+
+    game.start()
